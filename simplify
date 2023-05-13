@@ -1,0 +1,101 @@
+(setq w3 `(* a b 1))
+(setq w5 `(((* a b)) c (* f 0)))
+(defun simp_to_list(expr)
+    (cond
+        ((equal expr nil) nil)
+        ((atom (car expr)) expr)
+        (t (simp_to_list (car expr)))
+    )
+)
+
+
+;(print w5)
+
+(defun nullifier(expr)
+    (cond
+        ;((equal (cdr expr) nil) (car expr))
+        ;((equal (car expr) 0) 0)
+        ;((not(atom (car expr))) (nullifier(simp_to_list(car expr))) )
+        ;(t (nullifier (cdr expr)))
+    )
+)
+
+;(print (nullifier w5))
+(defun printem (&rest args)
+  (format t "~{~a~^ ~}" args))
+;--------------------------------------------------------
+(setq f '()) ;global main result
+(defun setter(_atom)
+    (cond
+        ((equal _atom (car f)) nil)
+        (t(setq f (append f (list _atom))))
+    )
+)
+
+(setq f '()) ;global main result
+(setq w2 `(- 5 2 4) ) ; ==> (+ a b 5)
+(setq w3 `(+ 1 a 2 b 4 c) ) ; ==> (+ a b 5)
+(setq w5 `(+ a b (* b (+ c 0) b) (*(+ b f ) 0)) ) ; ==> (+ a b (* b  c  b) )
+(setq w6 `(+ q (+ (* a b) w) c (+ (* d (* e f)) (+ 0 r))) )
+
+(defun rf (expr)
+    (let ((final_expr `()) (cur_sign nil))
+        (labels ((actual_r (tmp_expr)
+;(print tmp_val)
+            (cond
+                ((equal (car tmp_expr) nil) 'end)
+                ((atom (car tmp_expr)) (setq final_expr (append final_expr (list(car tmp_expr)))) (actual_r (cdr tmp_expr)))
+                ;((atom (car tmp_expr)) (print (car tmp_expr)) (actual_r (cdr tmp_expr)))
+                ;((not (atom (car tmp_expr))) (rf (car tmp_expr)) (actual_r (cdr tmp_expr)))
+                ((not (atom (car tmp_expr))) (actual_r (car tmp_expr)) (actual_r (cdr tmp_expr)))
+         )))
+        (actual_r expr))
+    (print final_expr)
+    ;(setq f (append f (list tmp_expr)))
+    )
+)
+
+(rf w5)
+;(print f)
+
+(defun summ(expr)
+    (print `(exp= ,expr))
+    (let ((tmp_expr '()) (tmp_summ 0) (tmp_mul 1) (tmp_sign (car expr)))
+         (print tmp_expr)
+         (labels ((rec (exp)
+             (cond
+                 ((equal (car exp) nil) tmp_expr)
+                 ;((and (equal tmp_sign '+) (numberp (car exp))) (setq tmp_summ (+ tmp_summ (car exp))) (rec (cdr exp)))
+                 ((and (equal tmp_expr nil) (equal tmp_sign '-) (numberp (cadr exp)))
+                          (setq tmp_summ (- tmp_summ (cadr exp))) (setq tmp_expr (append tmp_expr (list(car exp)))) (rec (cddr exp))) ; if "-" and first in list - number
+                 ((and (or (equal tmp_sign '-) (equal tmp_sign '+)) (numberp (car exp))) (setq tmp_summ (+ tmp_summ (car exp))) (rec (cdr exp))) ; for + and -
+                 ((and (equal tmp_sign '*) (numberp (car exp))) (setq tmp_mul (* tmp_mul (car exp))) (rec (cdr exp)))
+                 (t (setq tmp_expr (append tmp_expr (list(car exp)))) (rec (cdr exp)))
+             )))
+          (rec expr))
+         ; appending numbers result
+         (cond
+             ((equal tmp_sign '+) (print `(tmp_summ= ,tmp_summ)) (print `(tmp_expr= ,(append tmp_expr (list tmp_summ)))))
+             ((equal tmp_sign '-) (print `(tmp_summ= ,tmp_summ)) (print `(tmp_expr= ,(append tmp_expr (list tmp_summ)))))
+             ((and (equal tmp_sign '*) (equal tmp_mul 0)) (print `(tmp_mul= ,tmp_mul)) (print `(tmp_expr= ,(setq tmp_expr 0))))
+             ((equal tmp_sign '*) (print `(tmp_mul= ,tmp_mul)) (print `(tmp_expr= ,(append tmp_expr (list tmp_mul)))))
+         
+         )
+    )
+)
+(summ w3)
+
+(defun f(expr)
+    ;(print `(expr= ,expr))
+    (let ((tmp_car (car expr)))
+        (cond
+            ((equal tmp_car nil) 'end)
+            ;((atom tmp_car) (setter tmp_car) (f (cdr expr)))
+            ((atom tmp_car) (print tmp_car) (f (cdr expr)))
+            ((not (atom tmp_car)) (f tmp_car) (f (cdr expr)))
+        )
+    )
+)
+
+;(f w6)
+;(print f)
