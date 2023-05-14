@@ -34,7 +34,7 @@
 
 (setq f '()) ;global main result
 (setq w2 `(- 5 2 4) ) ; ==> (+ a b 5)
-(setq w3 `(/ 2 a 2 b 4 c) ) ; ==> (+ a b 5)
+(setq w3 `(/ 0 a 2 b 4 c) ) ; ==> (+ a b 5)
 (setq w5 `(+ a b (* b (+ c 0) b) (*(+ b f ) 0)) ) ; ==> (+ a b (* b  c  b) )
 (setq w6 `(+ q (+ (* a b) w) c (+ (* d (* e f)) (+ 0 r))) )
 
@@ -49,7 +49,7 @@
                  ((or (equal (car exp) '+) (equal (car exp) '-) (equal (car exp) '*) (equal (car exp) '/)) (rec (cdr exp))) ; step over sign
                  ((and (equal tmp_expr nil) (equal tmp_sign '-) (numberp (car exp))) ; if "-" and first in list - number
                           (setq tmp_summ (- tmp_summ (car exp))) (rec (cdr exp)))
-                 ((and (equal tmp_expr nil) (equal tmp_sign '/) (numberp (cadr exp)) (equal (cadr exp) 0)) (setq tmp_mul 0)) ; case 0 / ...
+                 ((and (equal tmp_expr nil) (equal tmp_sign '/) (numberp (car exp)) (equal (car exp) 0)) (setq tmp_mul 0)) ; case 0 / ...
                  ((and (equal tmp_expr nil) (equal tmp_sign '/) (numberp (car exp))) ; if "/" and first in list - number
                           (setq tmp_mul (car exp)) (rec (cdr exp)))
                  ((and (or (equal tmp_sign '-) (equal tmp_sign '+)) (numberp (car exp))) (setq tmp_summ (+ tmp_summ (car exp))) (rec (cdr exp))) ; for + and -
@@ -64,8 +64,8 @@
              ((and (equal (cdr tmp_expr) nil) (or (equal tmp_sign '*) (equal tmp_sign '/))) (setq tmp_expr tmp_mul))
              ((equal tmp_sign '+) (print `(tmp_summ= ,tmp_summ)) (append (list tmp_sign tmp_summ) tmp_expr))
              ((equal tmp_sign '-) (print `(tmp_summ= ,tmp_summ)) (append (list tmp_sign (* -1 tmp_summ)) tmp_expr))
-             ((and (equal tmp_sign '/) (equal tmp_mul 0)) (print `(tmp_mul= ,tmp_mul)) (print `(tmp_expr= ,(setq tmp_expr 'err))))
-             ((and (equal tmp_sign '*) (equal tmp_mul 0)) (print `(tmp_mul= ,tmp_mul)) (print `(tmp_expr= ,(setq tmp_expr 0))))
+             ((and (equal tmp_sign '/) (equal tmp_mul 0)) (print `(tmp_mul= ,tmp_mul)) (setq tmp_expr 'err))
+             ((and (equal tmp_sign '*) (equal tmp_mul 0)) (print `(tmp_mul= ,tmp_mul)) (setq tmp_expr 0))
              ((or (equal tmp_sign '*) (equal tmp_sign '/)) (print `(tmp_mul= ,tmp_mul)) (print `(tmp_expr= ,(append (list tmp_sign tmp_mul) tmp_expr))))
          
          )
