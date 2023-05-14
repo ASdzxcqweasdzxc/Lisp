@@ -1,6 +1,6 @@
 (setq f '()) ;global main result
-(setq w2 `(- 5 2 4) ) ; ==> (+ a b 5)
-(setq w3 `(/ a 2 b 4 c) ) ; ==> (+ a b 5)
+(setq w2 `(+ b 2) ) ; ==> (+ a b 5)
+(setq w3 `(+ a (- b (* 2 f 3) 2) 4 c 5) ) ; ==> (+ a b 5)
 (setq w5 `(+ a b (* b (+ c 0) b) (*(+ b f ) 0)) ) ; ==> (+ a b (* b  c  b) )
 (setq w6 `(+ q (+ (* a b) w) c (+ (* d (* e f)) (+ 0 r))) )
 
@@ -12,6 +12,7 @@
          (labels ((rec (exp)
              (cond
                  ((equal (car exp) nil) tmp_expr)
+                 ((not (atom (car exp))) (setq tmp_expr (append tmp_expr (list (summ (car exp))))) (rec (cdr exp)))
                  ((and (equal (car exp) '-) (not (numberp (cadr exp)))) (setq tmp_mul 0) (rec (cdr exp))) ; minus case, letter first
                  ((and (equal (car exp) '/) (not (numberp (cadr exp)))) (setq tmp_summ 'n) (rec (cdr exp))) ; div case, letter first
                  ((or (equal (car exp) '+) (equal (car exp) '-) (equal (car exp) '*) (equal (car exp) '/)) (rec (cdr exp))) ; step over sign
@@ -27,9 +28,10 @@
              )))
           (rec expr))
          ; appending numbers result
+         (print tmp_expr)
          (cond
-             ((and (equal (cdr tmp_expr) nil) (or (equal tmp_sign '+) (equal tmp_sign '-))) (setq tmp_expr tmp_summ))
-             ((and (equal (cdr tmp_expr) nil) (or (equal tmp_sign '*) (equal tmp_sign '/))) (setq tmp_expr tmp_mul))
+             ((and (equal (car tmp_expr) nil) (or (equal tmp_sign '+) (equal tmp_sign '-))) (setq tmp_expr tmp_summ))
+             ((and (equal (car tmp_expr) nil) (or (equal tmp_sign '*) (equal tmp_sign '/))) (setq tmp_expr tmp_mul))
              ((equal tmp_sign '+) (print `(tmp_summ= ,tmp_summ)) (append (list tmp_sign tmp_summ) tmp_expr))
              ((and (equal tmp_sign '-) (equal tmp_mul 0)) (print `(tmp_summ= ,tmp_summ)) (append (list tmp_sign) tmp_expr (list tmp_summ))) ; if number not first
              ((equal tmp_sign '-) (print `(tmp_summ= ,tmp_summ)) (append (list tmp_sign (* -1 tmp_summ)) tmp_expr))
@@ -41,6 +43,3 @@
     )
 )
 (print `(result= ,(summ w3)))
-
-
-
