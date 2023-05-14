@@ -34,29 +34,10 @@
 
 (setq f '()) ;global main result
 (setq w2 `(- 5 2 4) ) ; ==> (+ a b 5)
-(setq w3 `(+ 1 a 2 b 4 c) ) ; ==> (+ a b 5)
+(setq w3 `(/ 2 a 2 b 4 c) ) ; ==> (+ a b 5)
 (setq w5 `(+ a b (* b (+ c 0) b) (*(+ b f ) 0)) ) ; ==> (+ a b (* b  c  b) )
 (setq w6 `(+ q (+ (* a b) w) c (+ (* d (* e f)) (+ 0 r))) )
 
-(defun rf (expr)
-    (let ((final_expr `()) (cur_sign nil))
-        (labels ((actual_r (tmp_expr)
-;(print tmp_val)
-            (cond
-                ((equal (car tmp_expr) nil) 'end)
-                ((atom (car tmp_expr)) (setq final_expr (append final_expr (list(car tmp_expr)))) (actual_r (cdr tmp_expr)))
-                ;((atom (car tmp_expr)) (print (car tmp_expr)) (actual_r (cdr tmp_expr)))
-                ;((not (atom (car tmp_expr))) (rf (car tmp_expr)) (actual_r (cdr tmp_expr)))
-                ((not (atom (car tmp_expr))) (actual_r (car tmp_expr)) (actual_r (cdr tmp_expr)))
-         )))
-        (actual_r expr))
-    (print final_expr)
-    ;(setq f (append f (list tmp_expr)))
-    )
-)
-
-(rf w5)
-;(print f)
 
 (defun summ(expr)
     (print `(exp= ,expr))
@@ -65,25 +46,32 @@
          (labels ((rec (exp)
              (cond
                  ((equal (car exp) nil) tmp_expr)
-                 ;((and (equal tmp_sign '+) (numberp (car exp))) (setq tmp_summ (+ tmp_summ (car exp))) (rec (cdr exp)))
-                 ((and (equal tmp_expr nil) (equal tmp_sign '-) (numberp (cadr exp)))
-                          (setq tmp_summ (- tmp_summ (cadr exp))) (setq tmp_expr (append tmp_expr (list(car exp)))) (rec (cddr exp))) ; if "-" and first in list - number
+                 ((or (equal (car exp) '+) (equal (car exp) '-) (equal (car exp) '*) (equal (car exp) '/)) (rec (cdr exp))) ; step over sign
+                 ((and (equal tmp_expr nil) (equal tmp_sign '-) (numberp (car exp))) ; if "-" and first in list - number
+                          (setq tmp_summ (- tmp_summ (car exp))) (rec (cdr exp)))
+                 ((and (equal tmp_expr nil) (equal tmp_sign '/) (numberp (cadr exp)) (equal (cadr exp) 0)) (setq tmp_mul 0)) ; case 0 / ...
+                 ((and (equal tmp_expr nil) (equal tmp_sign '/) (numberp (car exp))) ; if "/" and first in list - number
+                          (setq tmp_mul (car exp)) (rec (cdr exp)))
                  ((and (or (equal tmp_sign '-) (equal tmp_sign '+)) (numberp (car exp))) (setq tmp_summ (+ tmp_summ (car exp))) (rec (cdr exp))) ; for + and -
-                 ((and (equal tmp_sign '*) (numberp (car exp))) (setq tmp_mul (* tmp_mul (car exp))) (rec (cdr exp)))
+                 ((and (equal tmp_sign '*) (numberp (car exp))) (setq tmp_mul (* tmp_mul (car exp))) (rec (cdr exp))) ; mult case
+                 ((and (equal tmp_sign '/) (numberp (car exp))) (setq tmp_mul (/ tmp_mul (car exp))) (rec (cdr exp))) ; div case
                  (t (setq tmp_expr (append tmp_expr (list(car exp)))) (rec (cdr exp)))
              )))
           (rec expr))
          ; appending numbers result
          (cond
-             ((equal tmp_sign '+) (print `(tmp_summ= ,tmp_summ)) (print `(tmp_expr= ,(append tmp_expr (list tmp_summ)))))
-             ((equal tmp_sign '-) (print `(tmp_summ= ,tmp_summ)) (print `(tmp_expr= ,(append tmp_expr (list tmp_summ)))))
+             ((and (equal (cdr tmp_expr) nil) (or (equal tmp_sign '+) (equal tmp_sign '-))) (setq tmp_expr tmp_summ))
+             ((and (equal (cdr tmp_expr) nil) (or (equal tmp_sign '*) (equal tmp_sign '/))) (setq tmp_expr tmp_mul))
+             ((equal tmp_sign '+) (print `(tmp_summ= ,tmp_summ)) (append (list tmp_sign tmp_summ) tmp_expr))
+             ((equal tmp_sign '-) (print `(tmp_summ= ,tmp_summ)) (append (list tmp_sign (* -1 tmp_summ)) tmp_expr))
+             ((and (equal tmp_sign '/) (equal tmp_mul 0)) (print `(tmp_mul= ,tmp_mul)) (print `(tmp_expr= ,(setq tmp_expr 'err))))
              ((and (equal tmp_sign '*) (equal tmp_mul 0)) (print `(tmp_mul= ,tmp_mul)) (print `(tmp_expr= ,(setq tmp_expr 0))))
-             ((equal tmp_sign '*) (print `(tmp_mul= ,tmp_mul)) (print `(tmp_expr= ,(append tmp_expr (list tmp_mul)))))
+             ((or (equal tmp_sign '*) (equal tmp_sign '/)) (print `(tmp_mul= ,tmp_mul)) (print `(tmp_expr= ,(append (list tmp_sign tmp_mul) tmp_expr))))
          
          )
     )
 )
-(summ w3)
+(print `(result= ,(summ w3)))
 
 (defun f(expr)
     ;(print `(expr= ,expr))
@@ -99,3 +87,5 @@
 
 ;(f w6)
 ;(print f)
+
+
