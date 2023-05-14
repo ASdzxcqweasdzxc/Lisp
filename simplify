@@ -1,9 +1,3 @@
-(setq w2 `(+ b 0) ) ; ==> (+ a b 5)
-(setq w3 `(+ a (- b (* 2 f) 2) 4 c 5) ) ; ==> (+ a b 5)
-(setq w5 `(+ a b (* b (+ c 0) b) (* (+ b f ) 0)) ) ; ==> (+ a b (* b  c  b) )
-(setq w6 `(+ q (+ (* a b) w) c (+ (* d (* e f)) (+ 0 r))) )
-
-
 (defun summ(expr)
     (print `(exp= ,expr))
     (let ((tmp_expr '()) (tmp_summ 0) (tmp_mul 1) (tmp_sign (car expr)))
@@ -24,25 +18,41 @@
                  ((and (equal tmp_sign '-) (equal tmp_mul 0) (numberp (car exp))) (setq tmp_summ (+ tmp_summ (car exp))) (rec (cdr exp))) ; for + and -
                  ((and (equal tmp_sign '*) (numberp (car exp))) (setq tmp_mul (* tmp_mul (car exp))) (rec (cdr exp))) ; mult case
                  ((and (equal tmp_sign '/) (numberp (car exp))) (setq tmp_mul (/ tmp_mul (car exp))) (rec (cdr exp))) ; div case
-                 (t (setq tmp_expr (append tmp_expr (list(car exp)))) (rec (cdr exp)))
+                 (t (setq tmp_expr (append tmp_expr (list(car exp)))) (rec (cdr exp))) ; append any atom, but number
              )))
           (rec expr))
          ; appending numbers result
-         (print tmp_expr)
+         ;(print tmp_expr)
          (cond
              ((and (equal (car tmp_expr) nil) (or (equal tmp_sign '+) (equal tmp_sign '-))) (setq tmp_expr tmp_summ))
              ((and (equal (car tmp_expr) nil) (or (equal tmp_sign '*) (equal tmp_sign '/))) (setq tmp_expr tmp_mul))
+             ((and (equal tmp_sign '+) (equal tmp_summ 0) (atom (cdr tmp_expr))) (print `(tmp_summ= ,tmp_summ)) tmp_expr ) ; if just one atom, but not number
+             ((and (equal tmp_sign '+) (equal tmp_summ 0)) (print `(tmp_summ= ,tmp_summ)) (append (list tmp_sign) tmp_expr )) ; if number not first
              ((equal tmp_sign '+) (print `(tmp_summ= ,tmp_summ)) (append (list tmp_sign tmp_summ) tmp_expr))
-             ((and (equal tmp_sign '-) (equal tmp_mul 0)) (print `(tmp_summ= ,tmp_summ)) (append (list tmp_sign) tmp_expr (list tmp_summ))) ; if number not first
+             ((and (equal tmp_sign '-) (equal tmp_summ 0) (equal tmp_mul 1) (atom (car tmp_expr))) (print `(tmp_summs= ,tmp_summ)) `(- ,(car tmp_expr)) ) ; if just one atom, but not number
+             ((and (equal tmp_sign '-) (equal tmp_summ 0) (equal tmp_mul 0) (atom (car tmp_expr))) (print `(tmp_summ= ,tmp_summ)) (car tmp_expr) ) ; if just one atom, but not number
+             ((and (equal tmp_sign '-) (equal tmp_summ 0) (equal tmp_mul 0)) (print `(tmp_summzz= ,tmp_summ)) (append (list tmp_sign) tmp_expr )) ; if number not first
+             ((and (equal tmp_sign '-) (equal tmp_mul 0)) (print `(tmp_summz= ,tmp_summ)) (append (list tmp_sign) tmp_expr (list tmp_summ))) ; if number not first
              ((equal tmp_sign '-) (print `(tmp_summ= ,tmp_summ)) (append (list tmp_sign (* -1 tmp_summ)) tmp_expr))
+             ((and (equal tmp_sign '/) (equal tmp_mul 1) (equal tmp_summ 'n)) (print `(tmp_mul= ,tmp_mul)) (append (list tmp_sign) tmp_expr)) ; if number not first and mul == 1
              ((and (equal tmp_sign '/) (equal tmp_summ 'n)) (print `(tmp_mul= ,tmp_mul)) (append (list tmp_sign) tmp_expr (list (/ 1 tmp_mul)))) ; if number not first
+             ((and (equal tmp_sign '*) (equal tmp_mul 1)) (print `(tmp_mul= ,tmp_mul)) tmp_expr)
              ((and (equal tmp_sign '*) (equal tmp_mul 0)) (print `(tmp_mul= ,tmp_mul)) (setq tmp_expr 0))
              ((or (equal tmp_sign '*) (equal tmp_sign '/)) (print `(tmp_mul= ,tmp_mul)) (append (list tmp_sign tmp_mul) tmp_expr))
          
          )
     )
 )
-(print `(result= ,(summ w2)))
+
+
+(setq a1 `(- b 0))
+(setq w2 `(/ a b 1) ) ; ==> (+ a b 5)
+(setq w3 `(+ a (- b (* 2 f) 2) 4 c 5) ) ; ==> (+ a b 5)
+(setq w5 `(+ a b (* b (+ c 0) b) (* (+ b 1 ) 1)) ) ; ==> (+ a b (* b  c  b) )
+(setq w6 `(+ q (+ (* a b) w) c (+ (* d (* e f)) (+ 0 r))) )
+
+
+(print `(result= ,(summ a1)))
 
 
 
