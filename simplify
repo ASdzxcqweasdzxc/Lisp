@@ -29,9 +29,9 @@
              ((and (equal tmp_sign '+) (equal tmp_summ 0) (atom (cdr tmp_expr))) (print `(tmp_summ= ,tmp_summ)) tmp_expr ) ; if just one atom, but not number
              ((and (equal tmp_sign '+) (equal tmp_summ 0)) (print `(tmp_summ= ,tmp_summ)) (append (list tmp_sign) tmp_expr )) ; if number not first
              ((equal tmp_sign '+) (print `(tmp_summ= ,tmp_summ)) (append (list tmp_sign tmp_summ) tmp_expr))
-             ((and (equal tmp_sign '-) (equal tmp_summ 0) (equal tmp_mul 1) (atom (car tmp_expr))) (print `(tmp_summs= ,tmp_summ)) `(- ,(car tmp_expr)) ) ; if just one atom, but not number
-             ((and (equal tmp_sign '-) (equal tmp_summ 0) (equal tmp_mul 0) (atom (car tmp_expr))) (print `(tmp_summ= ,tmp_summ)) (car tmp_expr) ) ; if just one atom, but not number
-             ((and (equal tmp_sign '-) (equal tmp_summ 0) (equal tmp_mul 0)) (print `(tmp_summzz= ,tmp_summ)) (append (list tmp_sign) tmp_expr )) ; if number not first
+             ((and (equal tmp_sign '-) (equal tmp_summ 0) (equal tmp_mul 0) (equal (length tmp_expr) 1)) (print `(tmp_summs= ,tmp_summ)) (car tmp_expr) ) ; if just one atom, but not number
+             ;((and (equal tmp_sign '-) (equal tmp_summ 0) (equal tmp_mul 0) (atom (car tmp_expr))) (print `(tmp_summ= ,tmp_summ)) (car tmp_expr) ) ; if just one atom, but not number
+             ((and (equal tmp_sign '-) (equal tmp_summ 0) (equal tmp_mul 0)) (print `(tmp_summzz= ,tmp_summ)) (append (list tmp_sign) tmp_expr) ) ; if number not first
              ((and (equal tmp_sign '-) (equal tmp_mul 0)) (print `(tmp_summz= ,tmp_summ)) (append (list tmp_sign) tmp_expr (list tmp_summ))) ; if number not first
              ((equal tmp_sign '-) (print `(tmp_summ= ,tmp_summ)) (append (list tmp_sign (* -1 tmp_summ)) tmp_expr))
              ((and (equal tmp_sign '/) (equal tmp_mul 1) (equal tmp_summ 'n)) (print `(tmp_mul= ,tmp_mul)) (append (list tmp_sign) tmp_expr)) ; if number not first and mul == 1
@@ -45,14 +45,18 @@
 )
 
 
-(setq a1 `(- b 0))
-(setq w2 `(/ a b 1) ) ; ==> (+ a b 5)
+(setq a1 `(+ b 0))
+(setq a2 `(+ a b))
+(setq a3 `(+ 0 b (+ d f)))
+(setq a4 `(+ 0 b (- d f)))
+(setq s1 `(- b 0))
+(setq s2 `(- a b))
+(setq s3 `(- 0 b (+ d f)))
+(setq d2 `(/ a b 1) ) ; ==> (+ a b 5)
 (setq w3 `(+ a (- b (* 2 f) 2) 4 c 5) ) ; ==> (+ a b 5)
-(setq w5 `(+ a b (* b (+ c 0) b) (* (+ b 1 ) 1)) ) ; ==> (+ a b (* b  c  b) )
-(setq w6 `(+ q (+ (* a b) w) c (+ (* d (* e f)) (+ 0 r))) )
 
 
-(print `(result= ,(summ a1)))
+(print `(result= ,(summ w3)))
 
 
 
