@@ -5,6 +5,7 @@
          (labels ((rec (exp)
              (cond
                  ((equal (car exp) nil) tmp_expr)
+                 ;((and (not (atom (car exp))) (not (equal tmp_sign (caar exp))) (numberp (summ (car exp)))) (setq tmp_expr 0) (rec (cdr exp))) ; inner brackets case
                  ((and (not (atom (car exp))) (equal tmp_sign (caar exp))) (setq tmp_expr (append tmp_expr (cdr (summ (car exp))))) (rec (cdr exp))) ; inner brackets case
                  ((and (not (atom (car exp))) (not (equal tmp_sign (caar exp)))) (setq tmp_expr (append tmp_expr (list (summ (car exp))))) (rec (cdr exp))) ; inner brackets case
                  ((and (equal (car exp) '-) (not (numberp (cadr exp)))) (setq tmp_mul 0) (rec (cdr exp))) ; minus case, letter first
@@ -54,11 +55,20 @@
 (setq s3 `(- 0 b (+ d f)))
 (setq d2 `(/ a b 1) ) ; ==> (+ a b 5)
 (setq w3 `(+ a (- b (* 2 f) 2) 4 c 5) ) ; ==> (+ a b 5)
-(setq w4 `(+ a (- b (* 2 f) 2) 4 c 5) ) ; ==> (+ a b 5)
+(setq w4 `(+ a (- b (* 0 f) 2) 4 c 5) ) ; ==> (+ a b 5)
 (setq w5 `(+ 9 A (- B 0 2) C) ) ; ==> (+ a b 5)
 (setq w6 `(+ a b (* b (+ c 0) b) (*(+ b f ) 0) ) ) ; ==> (+ a b 5)
 
 
-(print `(result= ,(summ w6)))
+;(print `(result= ,(summ w6)))
+;(print `(result= ,(summ (summ w5))))
 
+(defun simplify(expr)
+    (setq res (summ expr))
+    (cond
+        ((atom res) (print `(result= ,res)))
+        ((not (atom res)) (print `(result= ,(summ res))))
+    )
+)
 
+(simplify w3)
